@@ -11,11 +11,11 @@ import 'package:pub_server/shelf_pubserver.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 
-import 'src/examples/cow_repository.dart';
-import 'src/examples/file_repository.dart';
-import 'src/examples/http_proxy_repository.dart';
+import 'src/repository/cow_repository.dart';
+import 'src/repository/file_repository.dart';
+import 'src/repository/http_proxy_repository.dart';
 
-final Uri pubDartLangOrg = Uri.parse('https://pub.dartlang.org');
+final Uri pubDartLangOrg = Uri.parse('https://pub.dev');
 
 void main(List<String> args) {
   var parser = argsParser();
@@ -63,10 +63,9 @@ Future<HttpServer> runPubServer(
 ArgParser argsParser() {
   var parser = ArgParser();
 
-  parser.addOption('directory',
-      abbr: 'd', defaultsTo: 'pub_server-repository-data');
+  parser.addOption('directory', abbr: 'd', defaultsTo: '/app/packagedb');
 
-  parser.addOption('host', abbr: 'h', defaultsTo: 'localhost');
+  parser.addOption('host', abbr: 'h', defaultsTo: '0.0.0.0');
 
   parser.addOption('port', abbr: 'p', defaultsTo: '8080');
   parser.addFlag('standalone', abbr: 's', defaultsTo: false);
