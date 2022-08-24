@@ -25,6 +25,29 @@ final Logger _logger = Logger('pubserver.shelf_pubserver');
 ///
 /// The following API endpoints are provided by this shelf handler:
 ///
+//////   * Getting information about all packages.
+///
+///         GET /api/packages/list
+///         [200 OK] [Content-Type: application/json]
+///         {
+///           "name" : "<package-name>",
+///           "latest" : { ...},
+///           "versions" : [
+///             {
+///               "version" : "<version>",
+///               "archive_url" : "<download-url tar.gz>",
+///               "pubspec" : {
+///                 "author" : ...,
+///                 "dependencies" : { ... },
+///                 ...
+///               },
+///           },
+///           ...
+///           ],
+///         }
+///         or
+///         [404 Not Found]
+///
 ///   * Getting information about all versions of a package.
 ///
 ///         GET /api/packages/<package-name>
@@ -126,6 +149,8 @@ final Logger _logger = Logger('pubserver.shelf_pubserver');
 /// It will use the pub [PackageRepository] given in the constructor to provide
 /// this HTTP endpoint.
 class ShelfPubServer {
+  static final RegExp _allPackageRegexp = RegExp(r'^/api/packages/list');
+
   static final RegExp _packageRegexp = RegExp(r'^/api/packages/([^/]+)$');
 
   static final RegExp _versionRegexp =
@@ -148,6 +173,11 @@ class ShelfPubServer {
   Future<shelf.Response> requestHandler(shelf.Request request) async {
     var path = request.requestedUri.path;
     if (request.method == 'GET') {
+      if (path == '/api/packages/list') {
+        _logger.info('getting all packages');
+        return _listPackages(request.requestedUri);
+      }
+
       var downloadMatch = _downloadRegexp.matchAsPrefix(path);
       if (downloadMatch != null) {
         var package = Uri.decodeComponent(downloadMatch.group(1));
@@ -227,6 +257,13 @@ class ShelfPubServer {
       }
     }
     return shelf.Response.notFound(null);
+  }
+
+  Future<shelf.Response> _listPackages(Uri uri) async {
+    var binaryJson = convert.json.encoder
+        .fuse(convert.utf8.encoder)
+        .convert({'status': 'TODO'});
+    return _binaryJsonResponse(binaryJson);
   }
 
   // Metadata handlers.

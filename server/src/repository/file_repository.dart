@@ -68,6 +68,7 @@ class FileRepository extends PackageRepository {
     var archive = TarDecoder().decodeBytes(tarBytes);
     ArchiveFile pubspecArchiveFile;
     for (var file in archive.files) {
+      _logger.info('Start ${file.name}');
       if (file.name == 'pubspec.yaml') {
         pubspecArchiveFile = file;
         break;
