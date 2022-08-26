@@ -1,19 +1,20 @@
-FROM google/dart
-# uncomment next line to ensure latest Dart and root CA bundle
-#RUN apt -y update && apt -y upgrade
+FROM --platform=$BUILDPLATFORM dart:stable as builder
 WORKDIR /server
 COPY pubspec.* .
-RUN pub get
+RUN dart pub get
 COPY . .
-RUN pub get --offline
-RUN dart2native server/server.dart -o /server/app
+RUN dart pub get --offline
+RUN dart compile exe server/server.dart -o /server/app
 
+# Build minimal serving image from AOT-compiled `/server` and required system
+# libraries and configuration files stored in `/runtime/` from the build stage.
+FROM scratch
+COPY --from=builder /runtime/ /
+COPY --from=builder /server/app /server/
 
-FROM subfuzion/dart:slim
-COPY --from=0 /server/app /app/bin/server
 WORKDIR /app/packagedb
 
 VOLUME /app/packagedb
 
 EXPOSE 8080
-ENTRYPOINT ["/app/bin/server"]
+ENTRYPOINT ["/server/app"]
